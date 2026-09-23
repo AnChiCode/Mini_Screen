@@ -1,0 +1,33 @@
+[package]
+name = "mini_screen"
+version = "0.1.0"
+edition = "2024"
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
+[dependencies]
+dirs = "6.0.0"
+eframe = "0.35.0"
+egui = "0.35.0"
+image = "0.25.10"
+raw-window-handle = "0.6"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+winit = { version = "0.30", default-features = false }
+
+# 螢幕擷取後端：Windows 用 `windows-capture`，Linux 用 `xcap`。見 `src/capture.rs`、`src/monitor.rs`。
+[target."cfg(windows)".dependencies]
+windows-capture = "2.0.1"
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_Graphics_Gdi", "Win32_UI_HiDpi"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+xcap = "0.9.8"
+
+# 擷取與像素處理是熱路徑，opt-level 0 下會比 release 慢 10-50 倍。
+# 依賴全開最佳化；本 crate 的逐像素迴圈（capture.rs）則用 opt-level 1，兼顧重建速度與除錯資訊。
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
